@@ -1,0 +1,254 @@
+restart a Django Project
+---------------------------------------------------------------
+sudo nginx -s quit
+uwsgi --stop /tmp/ganges.pid
+python manage.py collectstatic
+uwsgi --ini ganges.ini
+sudo nginx
+
+_wiftcap server credential______________________________________________________________________
+ssh -i gcp.pem vaskarmistri1@35.208.231.204
+password:wiftcap2020
+--------------------------------------------------------
+
+-----GoDaddy credential-----------------------------------------------------
+ankitkanoria1
+password:Blanket28**
+--------------------------------------------------------
+
+----------comodo ssl credential-------------------------------------------
+1996subratasar@gmail.com
+subrata123
+--------------------------------------------------------------------------
+ankitkanoria1@gmail.com
+ankit123
+--------------------------------------------------
+
+1)clone project into the server using
+git clone https://github.com/vaskarmis1/Amik-Metals.git
+2) inside the project you need to create a config file help of "nano amik_nginx.conf"
+  
+--------------------------------------------------------------
+static config setup into the port
+-----------------------------------------------------------
+# configuration of the server
+server {
+    # the port your site will be served on
+    listen      8009;
+
+    server_name 35.208.231.204;
+
+   # return 301 https://www.wiftcap.com$request_uri;
+    charset     utf-8;
+    # max upload size
+    client_max_body_size 75M;   # adjust to taste
+
+    root /home/vaskarmistri1/Nezone;
+    index index.html;
+
+    ##Enable gzip
+    gzip on;
+    gzip_disable "MSIE [1-6]\\.(?!.*SV1)";
+    gzip_proxied any;
+    gzip_comp_level 5;
+    gzip_types text/plain text/css application/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascri$
+    gzip_vary on;
+    #gunzip on;      
+
+
+}
+---------------------------------------------------------------------------
+how to live a static project into the Domain
+---------------------------------------------------------------------------
+# configuration of the server
+server {
+    # the port your site will be served on
+    listen      80;
+    server_name wiftcap.com www.wiftcap.com;
+
+    return 301 https://www.wiftcap.com$request_uri;
+    charset     utf-8;
+    # max upload size
+    client_max_body_size 75M;   # adjust to taste
+
+    root /home/vaskarmistri1/wiftcapwebsite;
+    index index.html;
+
+    ##Enable gzip
+    gzip on;
+    gzip_disable "MSIE [1-6]\\.(?!.*SV1)";
+    gzip_proxied any;
+    gzip_comp_level 5;
+    gzip_types text/plain text/css application/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascri$
+    gzip_vary on;
+    #gunzip on;
+
+
+
+}
+/*ssl portion*/
+
+# configuration of the server
+server {
+    # the port your site will be served on
+    listen      443;
+
+
+    ssl on;
+
+
+    server_name wiftcap.com www.wiftcap.com;
+
+    ssl_certificate /etc/nginx/conf.d/wiftcap_chain.crt;
+
+    ssl_certificate_key /etc/nginx/conf.d/wiftcap.key;
+
+    ## Strict Transport Security header for enhanced security. See
+    add_header Strict-Transport-Security "max-age=7200";
+
+    charset     utf-8;
+    # max upload size
+    client_max_body_size 75M;   # adjust to taste
+  root /home/vaskarmistri1/wiftcapwebsite;
+    index index.html;
+
+
+    ##Enable gzip
+    gzip on;
+    gzip_disable "MSIE [1-6]\\.(?!.*SV1)";
+    gzip_proxied any;
+    gzip_comp_level 5;
+    gzip_types text/plain text/css application/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascri$
+    gzip_vary on;
+    #gunzip on;
+
+
+}
+
+
+-----------------------------------------------------------------------------
+Django project 
+---------------------------------------------------------------------------
+# the upstream component nginx needs to connect to
+upstream ganges  {
+    # server 127.0.0.1:8001;
+    server unix:///tmp/ganges.sock; # for a file socket, more effective
+}
+# configuration of the server
+server {
+    # the port your site will be served on
+    listen      80;
+    server_name gangesintl.com www.gangesintl.com;
+    # listen      8002;
+    # server_name 104.154.86.192;
+    return 301 https://www.gangesintl.com$request_uri;
+
+    ## Disable SSL
+    #ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+
+
+    charset  utf-8;
+    # max upload size
+    client_max_body_size 75M;   # adjust to taste
+    # Django media
+    location /media  {
+        alias  /home/vaskarmistri1/ganges_project/Ganges/media;  # your Django project's media files - amend as required
+    }
+
+    # Finally, send all non-media requests to the Django server.
+
+    location /static {
+       alias /home/vaskarmistri1/ganges_project/Ganges/static-prod;
+      expires 365d;
+    }
+
+    location / {
+        uwsgi_pass   unix:///tmp/ganges.sock;
+        include /home/vaskarmistri1/ganges_project/Ganges/uwsgi_params; # the uwsgi_params file you installed
+    }
+
+
+    ##Enable gzip
+    gzip on;
+    gzip_disable "MSIE [1-6]\\.(?!.*SV1)";
+    gzip_proxied any;
+    gzip_comp_level 5;
+    gzip_types text/plain text/css application/javascript application/x-javascript text/xml application/xml application/xml+rss text/javascri$
+    gzip_vary on;
+    #gunzip on;
+
+}
+
+/*ssl part */
+
+# configuration of the server
+server {
+    # the port your site will be served on
+    listen      443 http2;
+    server_name gangesintl.com www.gangesintl.com;
+
+    ssl on;
+
+    ## Disable SSL
+    ssl_protocols TLSv1 TLSv1.1 TLSv1.2;
+
+##Optimize Cipher Suites    
+    ssl_prefer_server_ciphers on;
+    ssl_ciphers ECDH+AESGCM:ECDH+AES256:ECDH+AES128:DHE+AES128:!ADH:!AECDH:!MD5;
+
+    ## Add generated DH parameters
+    ssl_dhparam /etc/nginx/conf.d/dhparam.pem;
+
+    ##Enable OCSP Stapling
+    ssl_stapling on;
+    ssl_stapling_verify on;
+    ssl_trusted_certificate /etc/nginx/conf.d/ganges_chain.crt;
+    resolver 8.8.8.8 8.8.4.4;
+
+
+
+    ssl_certificate /etc/nginx/conf.d/ganges_chain.crt;
+ ssl_certificate_key /etc/nginx/conf.d/ganges.key;
+
+    ## Strict Transport Security header for enhanced security. See
+    add_header Strict-Transport-Security "max-age=31536000";
+
+ ## Connection Credential Caching
+    ssl_session_cache shared:SSL:20m;
+    ssl_session_timeout 180m;
+
+    charset     utf-8;
+    # max upload size
+    client_max_body_size 75M;   # adjust to taste
+    # Django media
+     location /media  {
+        alias  /home/vaskarmistri1/ganges_project/Ganges/media;  # your Django project's media files - amend as required
+     }
+
+    #location /media  {
+        #alias /path/to/your/media;  # your Django project's media files - amend as required
+    #}
+
+location /static {
+ alias /home/vaskarmistri1/ganges_project/Ganges/static-prod; # your Django project's static files - amend as required
+        expires 365d;
+    }
+    # Finally, send all non-media requests to the Django server.
+    location / {
+        uwsgi_pass  unix:///tmp/ganges.sock;
+        include /home/vaskarmistri1/ganges_project/Ganges/uwsgi_params; # the uwsgi_params file you installed
+    }
+
+
+##Enable gzip
+    gzip on;
+    gzip_disable "MSIE [1-6]\\.(?!.*SV1)";
+    gzip_proxied any;
+    gzip_comp_level 5;
+    gzip_types text/plain text/css application/javascript application/x-javascript text/xml application/xml application/xml+rss tex$
+    gzip_vary on;
+     #gunzip on;
+    }
+
+
+
